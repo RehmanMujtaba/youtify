@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>Playlist Copy Backend</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" type="text/css" href="index.css" />
+</head>
+
+<body>
+    <h1 class="title">Playlist copy</h1>
+    <div class="buttonContainer">
+        <button type="button" onclick="openWindow('/auth/spotify')">Login with Spotify</button>
+        <button type="button" onclick="openWindow('/auth/youtube')">Login with Youtube</button>
+    </div>
+
+    <div class="playlistContainer">
+        <h2>Your Spotify Playlists</h2>
+        <button type="button" onclick="getSpotifyPlaylists()">Get Spotify Playlists</button>
+        <ul id="spotifyPlaylistList"></ul>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

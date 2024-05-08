@@ -1,131 +1,80 @@
-import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import { useState, useEffect } from 'react';
+import 'tailwindcss/tailwind.css';
+import { useRouter } from 'next/router';
+import axios from 'axios'; 
 
-export default function Home() {
+export default function IndexPage() {
+  const router = useRouter();
+  const [spotifyProfile, setSpotifyProfile] = useState(null);
+  const [youtubeProfile, setYoutubeProfile] = useState(null);
+
+  useEffect(() => {
+    // Fetch Spotify profile when component mounts
+    async function fetchSpotifyProfile() {
+      try {
+        const response = await axios.get('/api/user/spotify-profile');
+        setSpotifyProfile(response.data);
+      } catch (error) {
+        console.error('Error fetching Spotify profile:', error.message);
+      }
+    }
+    fetchSpotifyProfile();
+
+    // Fetch YouTube profile when component mounts
+    async function fetchYoutubeProfile() {
+      try {
+        const response = await axios.get('/api/user/youtube-profile');
+        setYoutubeProfile(response.data);
+      } catch (error) {
+        console.error('Error fetching YouTube profile:', error.message);
+      }
+    }
+    fetchYoutubeProfile();
+  }, []); // Run once when component mounts
+
+  const handleSpotifyLogin = () => {
+    router.push('/api/auth/spotify');
+  };
+
+  const handleYouTubeLogin = () => {
+    router.push('/api/auth/youtube');
+  };
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing <code>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
+      <h1 className="text-3xl font-bold mb-8">Playlist Copy</h1>
+      <div className="space-x-4 mb-8">
+        <button
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
+          onClick={handleSpotifyLogin}
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel" className={styles.logo} />
-        </a>
-      </footer>
+          Login with Spotify
+        </button>
+        <button
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+          onClick={handleYouTubeLogin}
+        >
+          Login with YouTube
+        </button>
+      </div>
 
-      <style jsx>{`
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        footer img {
-          margin-left: 0.5rem;
-        }
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          text-decoration: none;
-          color: inherit;
-        }
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family:
-            Menlo,
-            Monaco,
-            Lucida Console,
-            Liberation Mono,
-            DejaVu Sans Mono,
-            Bitstream Vera Sans Mono,
-            Courier New,
-            monospace;
-        }
-      `}</style>
+      {spotifyProfile && (
+        <div>
+          <h2 className="text-xl font-semibold">Spotify Profile</h2>
+          <p>Name: {spotifyProfile.display_name}</p>
+          <p>Email: {spotifyProfile.email}</p>
+          {/* Add more profile information as needed */}
+        </div>
+      )}
 
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family:
-            -apple-system,
-            BlinkMacSystemFont,
-            Segoe UI,
-            Roboto,
-            Oxygen,
-            Ubuntu,
-            Cantarell,
-            Fira Sans,
-            Droid Sans,
-            Helvetica Neue,
-            sans-serif;
-        }
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
+      {youtubeProfile && (
+        <div>
+          <h2 className="text-xl font-semibold">YouTube Profile</h2>
+          <p>Name: {youtubeProfile.name}</p>
+          <p>Email: {youtubeProfile.email}</p>
+          {/* Add more profile information as needed */}
+        </div>
+      )}
     </div>
   );
 }

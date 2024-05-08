@@ -1,22 +1,23 @@
 import axios from 'axios';
-import { getTokenFromCookies } from '../../../utility/cookies';
 
 export default async function handler(req, res) {
   try {
-    // Extract the access token from cookies
-    const { accessToken } = getTokenFromCookies(req);
-    console.log('accessToken:', accessToken);
+    const spotifyAccessToken = req.cookies.spotifyAccessToken;
+
+    if (!spotifyAccessToken) {
+      return res.status(401).json({ message: 'Access token not found' });
+    }
 
     const response = await axios.get('https://api.spotify.com/v1/me', {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${spotifyAccessToken}`,
       },
     });
 
-    const userProfile = response.data;
-    res.status(200).json(userProfile);
+    const spotifyProfile = response.data;
+    res.status(200).json(spotifyProfile);
   } catch (error) {
-    console.error('Error fetching user profile:', error.message);
-    res.status(500).json({ error: 'Failed to fetch user profile' });
+    console.error('Error fetching Spotify profile:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }

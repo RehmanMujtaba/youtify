@@ -2,8 +2,6 @@
 import { AuthorizationCode } from 'simple-oauth2';
 import dotenv from 'dotenv';
 
-import { setTokenCookies } from '../../../../utility/cookies';
-
 dotenv.config();
 
 const youtubeAuth = new AuthorizationCode({
@@ -28,11 +26,11 @@ export default async function handler(req, res) {
     };
 
     const accessToken = await youtubeAuth.getToken(tokenParams);
-    const { token } = youtubeAuth.createToken(accessToken);
+    res.setHeader('Set-Cookie', `youtubeAccessToken=${accessToken.token.access_token}; Path=/; HttpOnly`);
 
-    setTokenCookies(res, accessToken.token.access_token, accessToken.token.refresh_token);
-
-    res.redirect('/');
+    res.send(
+      `<script>window.opener.postMessage('youtube_auth_success', window.location.origin); window.close();</script>`
+    );
   } catch (error) {
     console.error('Access Token Error:', error.message);
     res.status(500).json('Authentication failed');

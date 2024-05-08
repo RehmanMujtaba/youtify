@@ -1,7 +1,6 @@
 // pages/api/auth/callback/spotify.js
-import { AuthorizationCode } from 'simple-oauth2';
-import dotenv from 'dotenv';
-import { setCookie } from 'utility/cookies';
+import { AuthorizationCode } from "simple-oauth2";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -11,9 +10,9 @@ const spotifyAuth = new AuthorizationCode({
     secret: process.env.SPOTIFY_CLIENT_SECRET,
   },
   auth: {
-    tokenHost: 'https://accounts.spotify.com',
-    authorizePath: '/authorize',
-    tokenPath: '/api/token',
+    tokenHost: "https://accounts.spotify.com",
+    authorizePath: "/authorize",
+    tokenPath: "/api/token",
   },
 });
 
@@ -27,11 +26,16 @@ export default async function handler(req, res) {
     };
 
     const accessToken = await spotifyAuth.getToken(tokenParams);
-    setCookie('spotifyAccessToken', accessToken, { expires: 7, secure: true });
+    res.setHeader(
+      "Set-Cookie",
+      `spotifyAccessToken=${accessToken.token.access_token}; Path=/; HttpOnly`
+    );
 
-    res.redirect('/');
+    res.send(
+      `<script>window.opener.postMessage('spotify_auth_success', window.location.origin); window.close();</script>`
+    );
   } catch (error) {
-    console.error('Access Token Error:', error.message);
-    res.status(500).json('Authentication failed');
+    console.error("Access Token Error:", error.message);
+    res.status(500).json("Authentication failed");
   }
 }

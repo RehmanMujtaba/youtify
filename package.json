@@ -2,11 +2,13 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {
     "axios": "^1.6.8",
+    "cookie": "^0.6.0",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "google-auth-library": "^9.9.0",
     "js-cookie": "^3.0.5",

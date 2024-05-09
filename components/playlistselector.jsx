@@ -10,7 +10,7 @@ const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
   width: 62,
   height: 34,
   padding: 7,
-  color: checked ? "green" : "red",
+  color: checked ? "1DB954" : "red",
   "& .MuiSwitch-switchBase": {
     margin: 1,
     padding: 0,
@@ -21,12 +21,12 @@ const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
       "& .MuiSwitch-thumb:before": {},
       "& + .MuiSwitch-track": {
         opacity: 1,
-        backgroundColor: theme.palette.mode === "dark" ? "#8796A5" : "#aab4be",
+        backgroundColor: theme.palette.mode === "dark" ? "#1DB954" : "lightslategray",
       },
     },
   },
   "& .MuiSwitch-thumb": {
-    backgroundColor: checked ? "green" : "red",
+    backgroundColor: checked ? "#1DB954" : "red",
     width: 32,
     height: 32,
     "&::before": {
@@ -42,7 +42,7 @@ const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
   },
   "& .MuiSwitch-track": {
     opacity: 1,
-    backgroundColor: theme.palette.mode === "dark" ? "#8796A5" : "#aab4be",
+    backgroundColor: theme.palette.mode === "dark" ? "lightslategray" : "lightslategray",
     borderRadius: 20 / 2,
   },
 }));
@@ -108,7 +108,13 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
             >
               <div className="flex flex-row gap-4 justify-between">
                 <div className="flex flex-col text-left">
-                  <p className="text-left text-gray-300 font-semibold">
+                  <p
+                    className={`text-left  ${
+                      selectedPlaylist === playlist.id
+                        ? "text-gray-900"
+                        : "text-gray-300"
+                    } font-semibold`}
+                  >
                     {playlist.name}
                   </p>
                   <p className="text-left text-gray-300 font-light">
@@ -143,16 +149,16 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
             inputProps={{ "aria-label": "Transfer switch" }}
           />
         </div>
-        <div className="flex flex-col w-full items-center">
+        <div className="flex flex-col w-full items-center gap-6">
           {originSelector}
-          <div>you've chosen {selectedPlaylist}</div>
           <button
             className={`w-full ${
               isTransferToSpotify
                 ? " bg-spotify-green hover:bg-green-700 "
                 : "bg-youtube-red hover:bg-red-700"
-            } font-bold text-white p-3 w-11/12 justify-center align-middle items-center rounded-md mr-2 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105`}
+            } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105`}
             onClick={() => {}}
+            disabled={!selectedPlaylist}
           >
             Copy to {isTransferToSpotify ? "Youtube" : "Spotify"}
           </button>

@@ -28,8 +28,6 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Error fetching YouTube profile:', error.message);
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
       console.error('Response data:', error.response.data);
       console.error('Response status:', error.response.status);
       console.error('Response headers:', error.response.headers);

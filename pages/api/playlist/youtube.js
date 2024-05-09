@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       "https://www.googleapis.com/youtube/v3/playlists",
       {
         params: {
-          part: "snippet",
+          part: "snippet, contentDetails",
           mine: true,
         },
         headers: {
@@ -28,6 +28,7 @@ export default async function handler(req, res) {
       name: playlist.snippet.title,
       description: playlist.snippet.description,
       image: playlist.snippet.thumbnails.default.url,
+      total: playlist.contentDetails.itemCount
     }));
 
     res.status(200).json(youtubePlaylists);

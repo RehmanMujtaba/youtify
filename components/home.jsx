@@ -38,7 +38,7 @@ const HomePage = ({
             </div>
           ) : (
             <button
-              className="bg-spotify-green w-full font-semibold hover:bg-green-700 text-white p-3 rounded-md mr-2 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110"
+              className="bg-spotify-green w-full font-semibold hover:bg-green-700 text-white p-3 rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110"
               onClick={async () => {
                 const spotifyLogin = await handleSpotifyLogin();
                 console.log(spotifyLogin);

@@ -1,19 +1,52 @@
 import "tailwindcss/tailwind.css";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useState, useEffect, use } from "react";
 import axios from "axios";
 
 import HomePage from "components/home";
-import PlaylistSelector from "components/playlistselector";
 import ActionPage from "components/actionpage";
 
 export default function IndexPage() {
-  const router = useRouter();
   const [spotifyProfile, setSpotifyProfile] = useState(null);
   const [youtubeProfile, setYoutubeProfile] = useState(null);
 
   const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
+  const [youtubePlaylists, setYoutubePlaylists] = useState([]);
+
+  const [isSpotifyLoggedIn, setIsSpotifyLoggedIn] = useState(false);
+  const [isYouTubeLoggedIn, setIsYouTubeLoggedIn] = useState(false);
+
+  useEffect(() => {
+    async function checkSpotify() {
+      try {
+        const response = await fetch("/api/auth/isLoggedIn?service=spotify");
+        if (response.status === 200) {
+          setIsSpotifyLoggedIn(false);
+          setIsSpotifyLoggedIn(true);
+        } else {
+          setIsSpotifyLoggedIn(false);
+        }
+      } catch (error) {
+        console.error("Error checking Spotify login status:", error);
+      }
+    }
+
+    async function checkYouTube() {
+      try {
+        const response = await fetch("/api/auth/isLoggedIn?service=youtube");
+        if (response.status === 200) {
+          setIsYouTubeLoggedIn(true);
+        } else {
+          setIsYouTubeLoggedIn(false);
+        }
+      } catch (error) {
+        console.error("Error checking YouTube login status:", error);
+      }
+    }
+
+    checkSpotify();
+    checkYouTube();
+  }, []);
 
   useEffect(() => {
     async function fetchSpotifyProfile() {
@@ -36,7 +69,9 @@ export default function IndexPage() {
     }
 
     fetchSpotifyPlaylists();
+  }, [isSpotifyLoggedIn]);
 
+  useEffect(() => {
     async function fetchYoutubeProfile() {
       try {
         const response = await axios.get("/api/user/youtube-profile");
@@ -46,7 +81,17 @@ export default function IndexPage() {
       }
     }
     fetchYoutubeProfile();
-  }, []);
+
+    async function fetchYoutubePlaylists() {
+      try {
+        const response = await axios.get("/api/playlist/youtube");
+        setYoutubePlaylists(response.data);
+      } catch (error) {
+        console.error("Error fetching YouTube playlists:", error);
+      }
+    }
+    fetchYoutubePlaylists();
+  }, [isYouTubeLoggedIn]);
 
   const handleSpotifyLogin = () => {
     return new Promise((resolve, reject) => {
@@ -59,18 +104,20 @@ export default function IndexPage() {
         alert("Please allow popups to continue with Spotify login.");
         reject(new Error("Popup blocked"));
       } else {
-        window.addEventListener('message', function(event) {
-          if (event.origin !== window.location.origin) return;
-          if (event.data === 'spotify_auth_success') {
-            resolve('success');
-          } else {
-            reject(new Error('Authentication failed'));
-          }
-        }, false);
+        window.addEventListener(
+          "message",
+          function (event) {
+            if (event.origin !== window.location.origin) return;
+            if (event.data === "spotify_auth_success") {
+              resolve("success");
+            }
+          },
+          false
+        );
       }
     });
   };
-  
+
   const handleYouTubeLogin = () => {
     return new Promise((resolve, reject) => {
       const popup = window.open(
@@ -82,14 +129,16 @@ export default function IndexPage() {
         alert("Please allow popups to continue with YouTube login.");
         reject(new Error("Popup blocked"));
       } else {
-        window.addEventListener('message', function(event) {
-          if (event.origin !== window.location.origin) return;
-          if (event.data === 'youtube_auth_success') {
-            resolve('success');
-          } else {
-            reject(new Error('Authentication failed'));
-          }
-        }, false);
+        window.addEventListener(
+          "message",
+          function (event) {
+            if (event.origin !== window.location.origin) return;
+            if (event.data === "youtube_auth_success") {
+              resolve("success");
+            }
+          },
+          false
+        );
       }
     });
   };
@@ -101,16 +150,22 @@ export default function IndexPage() {
   return (
     <div className="min-h-screen min-w-screen bg-slate-800">
       <HomePage
+        key={spotifyProfile + youtubeProfile}
         spotifyProfile={spotifyProfile}
         youtubeProfile={youtubeProfile}
         handleSpotifyLogin={handleSpotifyLogin}
         handleYouTubeLogin={handleYouTubeLogin}
+        isSpotifyLoggedIn={isSpotifyLoggedIn}
+        isYouTubeLoggedIn={isYouTubeLoggedIn}
+        setIsSpotifyLoggedIn={setIsSpotifyLoggedIn}
+        setIsYouTubeLoggedIn={setIsYouTubeLoggedIn}
       />
       {spotifyProfile && youtubeProfile && (
         <ActionPage
           spotifyProfile={spotifyProfile}
           youtubeProfile={youtubeProfile}
           spotifyPlaylists={spotifyPlaylists}
+          youtubePlaylists={youtubePlaylists}
         />
       )}
     </div>

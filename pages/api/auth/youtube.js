@@ -19,7 +19,7 @@ const youtubeAuth = new AuthorizationCode({
 export default async function handler(req, res) {
   const authorizationUri = youtubeAuth.authorizeURL({
     redirect_uri: process.env.YOUTUBE_REDIRECT_URI,
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    scope: 'https://www.googleapis.com/auth/youtube.force-ssl',
     response_type: 'code',
   });
 

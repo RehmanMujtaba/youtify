@@ -21,7 +21,8 @@ const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
       "& .MuiSwitch-thumb:before": {},
       "& + .MuiSwitch-track": {
         opacity: 1,
-        backgroundColor: theme.palette.mode === "dark" ? "#1DB954" : "lightslategray",
+        backgroundColor:
+          theme.palette.mode === "dark" ? "#1DB954" : "lightslategray",
       },
     },
   },
@@ -42,7 +43,8 @@ const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
   },
   "& .MuiSwitch-track": {
     opacity: 1,
-    backgroundColor: theme.palette.mode === "dark" ? "lightslategray" : "lightslategray",
+    backgroundColor:
+      theme.palette.mode === "dark" ? "lightslategray" : "lightslategray",
     borderRadius: 20 / 2,
   },
 }));
@@ -56,6 +58,23 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
     setIsTransferToSpotify(event.target.checked);
     setSelectedPlaylist("");
     setPlaylistSongs(null);
+  };
+
+  const transferYoutubePlaylist = async () => {
+    try {
+      const response = await axios.post("/api/playlist/transfer-youtube", {
+        playlistName: playlistSongs.name,
+        songs: playlistSongs.tracks,
+      });
+
+      if (response.status === 200) {
+        alert("Playlist transferred successfully");
+      } else {
+        // throw new Error("Failed to transfer playlist");
+      }
+    } catch (error) {
+      console.error("Error transferring playlist:", error);
+    }
   };
 
   useEffect(() => {
@@ -157,7 +176,11 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
                 ? " bg-spotify-green hover:bg-green-700 "
                 : "bg-youtube-red hover:bg-red-700"
             } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105`}
-            onClick={() => {}}
+            onClick={() => {
+              if (isTransferToSpotify) {
+                transferYoutubePlaylist();
+              }
+            }}
             disabled={!selectedPlaylist}
           >
             Copy to {isTransferToSpotify ? "Youtube" : "Spotify"}

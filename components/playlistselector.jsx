@@ -62,16 +62,41 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
 
   const transferYoutubePlaylist = async () => {
     try {
-      const response = await axios.post("/api/playlist/transfer-youtube", {
-        playlistName: playlistSongs.name,
-        songs: playlistSongs.tracks,
+      const response = await fetch("/api/playlist/transfer-youtube", {
+        method: "POST",
+        body: JSON.stringify({
+          playlistName: playlistSongs.name,
+          songs: playlistSongs.tracks,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      if (response.status === 200) {
-        alert("Playlist transferred successfully");
-      } else {
-        // throw new Error("Failed to transfer playlist");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const eventSource = new EventSource("/api/playlist/transfer-youtube");
+t
+      eventSource.onmessage = (event) => {
+        const completed = parseInt(event.data, 10);
+        console.log(
+          `Transferred ${completed} out of ${playlistSongs.tracks.length} songs`
+        );
+        // Update UI with progress information
+      };
+
+      eventSource.addEventListener("done", (event) => {
+        console.log("Transfer complete:", event.data);
+        // Update UI to indicate that the transfer is complete
+        eventSource.close();
+      });
+
+      eventSource.onerror = (error) => {
+        console.error("Error transferring playlist:", error);
+        // Handle error, update UI
+      };
     } catch (error) {
       console.error("Error transferring playlist:", error);
     }

@@ -1,5 +1,5 @@
 // components/PlaylistSelector.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { styled } from "@mui/system";
 import Switch from "@mui/material/Switch";
 import SimpleBar from "simplebar-react";
@@ -56,6 +56,9 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
   const [playlistSongs, setPlaylistSongs] = useState(null);
 
   const [progress, setProgress] = useState(1);
+  const [isTransferring, setIsTransferring] = useState(false);
+
+  const playlistDivRef = useRef(null);
 
   const handleSwitchChange = (event) => {
     setIsTransferToYouTube(event.target.checked);
@@ -81,6 +84,8 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         }
       );
 
+      setIsTransferring(true);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -93,7 +98,10 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         console.log(
           `Transferred ${completed} out of ${playlistSongs.tracks.length} songs`
         );
-        const currprogress = (completed / playlistSongs.tracks.length) * 100;
+
+        const completedInt = parseInt(completed, 10);
+        const totalSongsInt = parseInt(playlistSongs.tracks.length, 10);
+        const currprogress = Math.floor((completedInt / totalSongsInt) * 100);
         console.log(currprogress);
         setProgress(currprogress);
       };
@@ -102,21 +110,25 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         console.log("Transfer complete:", event.data);
         // Update UI to indicate that the transfer is complete
         eventSource.close();
-        setProgress(0);
+        setTimeout(() => {
+          setIsTransferring(false);
+          setProgress(0);
+        }, 2500);
       });
 
       eventSource.onerror = (error) => {
         console.error("Error transferring playlist:", error);
-        setProgress(0);
       };
     } catch (error) {
       console.error("Error transferring playlist:", error);
+      setIsTransferring(false);
       setProgress(0);
     }
   };
 
   const cleanPlaylist = async () => {
     try {
+      setIsTransferring(true);
       const response = await fetch(
         `/api/playlist/clean-${!isTransferToYouTube ? "youtube" : "spotify"}`,
         {
@@ -143,7 +155,9 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         console.log(
           `Transferred ${completed} out of ${playlistSongs.tracks.length} songs`
         );
-        const currprogress = (completed / playlistSongs.tracks.length) * 100;
+        const completedInt = parseInt(completed, 10);
+        const totalSongsInt = parseInt(playlistSongs.tracks.length, 10);
+        const currprogress = Math.floor((completedInt / totalSongsInt) * 100);
         console.log(currprogress);
         setProgress(currprogress);
       };
@@ -152,7 +166,10 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         console.log("Transfer complete:", event.data);
         // Update UI to indicate that the transfer is complete
         eventSource.close();
-        setProgress(0);
+        setTimeout(() => {
+          setIsTransferring(false);
+          setProgress(0);
+        }, 2500);
       });
 
       eventSource.onerror = (error) => {
@@ -190,7 +207,10 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
     : youtubePlaylists;
 
   const originSelector = (
-    <div className="p-4 w-full  bg-slate-700 rounded-lg shadow-2xl ">
+    <div
+      ref={playlistDivRef}
+      className="p-4 w-full  bg-slate-700 rounded-lg shadow-2xl "
+    >
       <p className="bg-slate-900  text-gray-300 text-2xl  rounded-lg span-2  text-center font-bold mb-2 p-2">
         <span className="justify-center">
           <span className="">{"Select "}</span>
@@ -300,7 +320,18 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
           <div className="flex flex-col w-full items-center gap-6">
             {originSelector}
 
-            {progress != 0 && <ProgressBar completed={progress} />}
+            {isTransferring && (
+              <ProgressBar
+                bgColor={isTransferToYouTube ? "#2BDE6A" : "#FF3333"}
+                width={
+                  playlistDivRef.current && playlistDivRef.current.offsetWidth
+                }
+                completed={progress}
+                isLabelVisible={false}
+                transitionDuration="2s"
+                transitionTimingFunction="ease-out"
+              />
+            )}
 
             <div className="flex flex-row justify-between flex-grow w-full items-center gap-4 sm:gap-6">
               <div className="flex-grow w-1/2">

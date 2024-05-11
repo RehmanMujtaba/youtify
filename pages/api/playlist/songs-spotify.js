@@ -1,4 +1,3 @@
-// spotify.js
 import axios from "axios";
 
 export default async function getPlaylist(req, res) {
@@ -19,6 +18,20 @@ export default async function getPlaylist(req, res) {
       }
     );
 
+    let songs = response.data.tracks.items;
+    let nextTracksUrl = response.data.tracks.next;
+
+    while (nextTracksUrl) {
+      const nextTracksResponse = await axios.get(nextTracksUrl, {
+        headers: {
+          Authorization: `Bearer ${spotifyAccessToken}`,
+        },
+      });
+
+      songs = songs.concat(nextTracksResponse.data.items);
+      nextTracksUrl = nextTracksResponse.data.next;
+    }
+
     const playlist = {
       id: response.data.id,
       name: response.data.name,
@@ -27,10 +40,11 @@ export default async function getPlaylist(req, res) {
         response.data.images && response.data.images.length > 0
           ? response.data.images[0].url
           : null,
-      tracks: response.data.tracks.items.map((item) => ({
+      tracks: songs.map((item, index) => ({
         id: item.track.id,
         name: item.track.name,
         artist: item.track.artists[0].name,
+        index: index
       })),
     };
 

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         params: {
           part: "snippet, contentDetails",
           mine: true,
-          maxResults: 15,
+          maxResults: 25,
         },
         headers: {
           Authorization: `Bearer ${youtubeAccessToken}`,

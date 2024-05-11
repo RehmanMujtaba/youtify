@@ -9,19 +9,28 @@ export default async function getPlaylist(req, res) {
       return res.status(401).json({ message: "Access token not found" });
     }
 
-    const response = await axios.get(
-      `https://www.googleapis.com/youtube/v3/playlistItems`,
-      {
-        params: {
-          part: "snippet",
-          playlistId: id,
-          maxResults: 50,
-        },
-        headers: {
-          Authorization: `Bearer ${youtubeAccessToken}`,
-        },
-      }
-    );
+    let nextPageToken;
+    let items = [];
+
+    do {
+      const response = await axios.get(
+        `https://www.googleapis.com/youtube/v3/playlistItems`,
+        {
+          params: {
+            part: "snippet",
+            playlistId: id,
+            maxResults: 50,
+            pageToken: nextPageToken,
+          },
+          headers: {
+            Authorization: `Bearer ${youtubeAccessToken}`,
+          },
+        }
+      );
+
+      items = items.concat(response.data.items);
+      nextPageToken = response.data.nextPageToken;
+    } while (nextPageToken);
 
     const titleResponse = await axios.get(
       `https://www.googleapis.com/youtube/v3/playlists?id=${id}`,
@@ -35,16 +44,16 @@ export default async function getPlaylist(req, res) {
       }
     );
 
-    
     const playlist = {
       id: id,
       name: titleResponse.data.items[0].snippet.title,
       description: titleResponse.data.items[0].snippet.description,
-      image: response.data.items[0]?.snippet?.thumbnails?.default?.url || 'default-image-url',
-      tracks: response.data.items.length > 0 ? response.data.items.map((item) => ({
+      image: items[0]?.snippet?.thumbnails?.default?.url || 'default-image-url',
+      tracks: items.length > 0 ? items.map((item, index) => ({
         id: item.snippet.resourceId.videoId,
         name: item.snippet.title,
         artist: item.snippet.channelTitle,
+        index: index,
       })) : [],
     };
 

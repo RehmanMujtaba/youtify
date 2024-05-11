@@ -16,32 +16,36 @@ export default async function handler(req, res) {
       res.status(500).json({ message: "Internal server error" });
     }
   } else if (req.method === "GET") {
-
     if (!playlistData) {
       return res.status(400).json({ message: "No playlist data" });
     }
 
-    const youtubeAccessToken = req.cookies.youtubeAccessToken;
-    if (!youtubeAccessToken) {
+    const spotifyAccessToken = req.cookies.spotifyAccessToken;
+    if (!spotifyAccessToken) {
       return res.status(401).json({ message: "Access token not found" });
     }
 
     try {
+      // Get the current user's ID
+      const meResponse = await axios.get("https://api.spotify.com/v1/me", {
+        headers: {
+          Authorization: `Bearer ${spotifyAccessToken}`,
+        },
+      });
+      const userId = meResponse.data.id;
+
       // Create a new playlist
       const playlistResponse = await axios.post(
-        "https://www.googleapis.com/youtube/v3/playlists?part=snippet%2Cstatus",
+        `https://api.spotify.com/v1/users/${userId}/playlists`,
         {
-          snippet: {
-            title: `🧼${playlistData.playlistName}🧼`,
-            description: "Cleaned by Youtify",
-          },
-          status: {
-            privacyStatus: "private",
-          },
+          name: `🧼${playlistData.playlistName}🧼`,
+          description: "Created by Youtify",
+          public: false,
         },
         {
           headers: {
-            Authorization: `Bearer ${youtubeAccessToken}`,
+            Authorization: `Bearer ${spotifyAccessToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -56,48 +60,42 @@ export default async function handler(req, res) {
 
       // Iterate over each song and add them to the playlist
       for (const song of playlistData.songs) {
-        console.log(song)
         try {
-            const searchResponse = await axios.get(
-            "https://www.googleapis.com/youtube/v3/search",
+          const searchResponse = await axios.get(
+            "https://api.spotify.com/v1/search",
             {
               params: {
-                part: "snippet",
-                maxResults: 1,
-                q: `${song.name} clean edited`,
-                type: "video",
+                q: `${song.name} ${song.artist} clean edit`,
+                type: "track",
+                limit: 4,
               },
               headers: {
-                Authorization: `Bearer ${youtubeAccessToken}`,
+                Authorization: `Bearer ${spotifyAccessToken}`,
               },
             }
           );
 
-          console.log(searchResponse)
+          if (searchResponse.data.tracks.items.length == 0) continue;
 
-          if (searchResponse.data.items.length > 0) {
-            const videoId = searchResponse.data.items[0].id.videoId;
+          const cleanTrack = searchResponse.data.tracks.items.find(
+            (item) => item.explicit === false
+          );
 
+          if (cleanTrack) {
             await axios.post(
-              "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet",
+              `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
               {
-                snippet: {
-                  playlistId: playlistId,
-                  resourceId: {
-                    kind: "youtube#video",
-                    videoId: videoId,
-                  },
-                },
+                uris: [cleanTrack.uri],
               },
               {
                 headers: {
-                  Authorization: `Bearer ${youtubeAccessToken}`,
+                  Authorization: `Bearer ${spotifyAccessToken}`,
                   "Content-Type": "application/json",
                 },
               }
             );
           } else {
-            console.log("No video found for: ", song.name);
+            console.log("No track found for: ", song.name);
           }
 
           // Send progress update
@@ -118,7 +116,7 @@ export default async function handler(req, res) {
       );
       res.end();
     } catch (error) {
-      console.error("Error creating YouTube playlist:", error);
+      //   console.error("Error creating Spotify playlist:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   } else {

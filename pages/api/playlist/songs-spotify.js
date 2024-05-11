@@ -18,8 +18,6 @@ export default async function getPlaylist(req, res) {
           },
         }
       );
-
-      console.log(response.data)
   
       const playlist = {
         id: response.data.id,

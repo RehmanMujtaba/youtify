@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       }
     );
 
-    const spotifyPlaylists = response.data.items.map((playlist) => ({
+    const spotifyPlaylists = response.data.items.map((playlist, index) => ({
       id: playlist.id,
       name: playlist.name,
       description: playlist.description,
@@ -26,7 +26,8 @@ export default async function handler(req, res) {
         playlist.images && playlist.images.length > 0
           ? playlist.images[0].url
           : null,
-      total: playlist.tracks.total
+      total: playlist.tracks.total,
+      index: index,
     }));
 
     res.status(200).json(spotifyPlaylists);

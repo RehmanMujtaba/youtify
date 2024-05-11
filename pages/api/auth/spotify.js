@@ -19,7 +19,7 @@ const spotifyAuth = new AuthorizationCode({
 export default async function handler(req, res) {
   const authorizationUri = spotifyAuth.authorizeURL({
     redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
-    scope: ['user-read-email', 'user-read-private'],
+    scope: ['user-read-email', 'user-read-private', 'playlist-modify-private'],
   });
 
   res.redirect(authorizationUri);

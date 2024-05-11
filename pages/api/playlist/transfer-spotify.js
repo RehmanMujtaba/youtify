@@ -16,35 +16,55 @@ export default async function handler(req, res) {
       res.status(500).json({ message: "Internal server error" });
     }
   } else if (req.method === "GET") {
-
     if (!playlistData) {
       return res.status(400).json({ message: "No playlist data" });
     }
 
-    const youtubeAccessToken = req.cookies.youtubeAccessToken;
-    if (!youtubeAccessToken) {
+    const spotifyAccessToken = req.cookies.spotifyAccessToken;
+    if (!spotifyAccessToken) {
       return res.status(401).json({ message: "Access token not found" });
     }
 
     try {
-      // Create a new playlist
-      const playlistResponse = await axios.post(
-        "https://www.googleapis.com/youtube/v3/playlists?part=snippet%2Cstatus",
-        {
-          snippet: {
-            title: `🧼${playlistData.playlistName}🧼`,
-            description: "Cleaned by Youtify",
-          },
-          status: {
-            privacyStatus: "private",
-          },
-        },
-        {
+      // Get the current user's ID
+      const meResponse = await axios
+        .get("https://api.spotify.com/v1/me", {
           headers: {
-            Authorization: `Bearer ${youtubeAccessToken}`,
+            Authorization: `Bearer ${spotifyAccessToken}`,
           },
-        }
-      );
+        })
+        .catch(function (error) {
+          if (error.response) {
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          }
+        });
+      const userId = meResponse.data.id;
+
+      // Create a new playlist
+      const playlistResponse = await axios
+        .post(
+          `https://api.spotify.com/v1/users/${userId}/playlists`,
+          {
+            name: `${playlistData.playlistName}`,
+            description: "Created by Youtify",
+            public: false,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${spotifyAccessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .catch(function (error) {
+          if (error.response) {
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          }
+        });
       const playlistId = playlistResponse.data.id;
 
       // Set up Server-Sent Events
@@ -56,48 +76,37 @@ export default async function handler(req, res) {
 
       // Iterate over each song and add them to the playlist
       for (const song of playlistData.songs) {
-        console.log(song)
         try {
-            const searchResponse = await axios.get(
-            "https://www.googleapis.com/youtube/v3/search",
+          const searchResponse = await axios.get(
+            "https://api.spotify.com/v1/search",
             {
               params: {
-                part: "snippet",
-                maxResults: 1,
-                q: `${song.name} clean edited`,
-                type: "video",
+                q: `${song.name.replace('video', '')} ${song.artist.replace('VEVO', '')}`,                type: "track",
+                limit: 1,
               },
               headers: {
-                Authorization: `Bearer ${youtubeAccessToken}`,
+                Authorization: `Bearer ${spotifyAccessToken}`,
               },
             }
           );
 
-          console.log(searchResponse)
-
-          if (searchResponse.data.items.length > 0) {
-            const videoId = searchResponse.data.items[0].id.videoId;
+          if (searchResponse.data.tracks.items.length > 0) {
+            const trackUri = searchResponse.data.tracks.items[0].uri;
 
             await axios.post(
-              "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet",
+              `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
               {
-                snippet: {
-                  playlistId: playlistId,
-                  resourceId: {
-                    kind: "youtube#video",
-                    videoId: videoId,
-                  },
-                },
+                uris: [trackUri],
               },
               {
                 headers: {
-                  Authorization: `Bearer ${youtubeAccessToken}`,
+                  Authorization: `Bearer ${spotifyAccessToken}`,
                   "Content-Type": "application/json",
                 },
               }
             );
           } else {
-            console.log("No video found for: ", song.name);
+            console.log("No track found for: ", song.name);
           }
 
           // Send progress update
@@ -118,7 +127,7 @@ export default async function handler(req, res) {
       );
       res.end();
     } catch (error) {
-      console.error("Error creating YouTube playlist:", error);
+      //   console.error("Error creating Spotify playlist:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   } else {

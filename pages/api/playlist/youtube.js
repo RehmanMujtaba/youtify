@@ -24,12 +24,13 @@ export default async function handler(req, res) {
 
     console.log(response.data.items);
 
-    const youtubePlaylists = response.data.items.map((playlist) => ({
+    const youtubePlaylists = response.data.items.map((playlist, index) => ({
       id: playlist.id,
       name: playlist.snippet.title,
       description: playlist.snippet.description,
       image: playlist.snippet.thumbnails.default.url,
-      total: playlist.contentDetails.itemCount
+      total: playlist.contentDetails.itemCount,
+      index: index
     }));
 
     res.status(200).json(youtubePlaylists);

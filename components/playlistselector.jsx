@@ -50,35 +50,84 @@ const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
 }));
 
 const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
-  const [selectedPlaylist, setSelectedPlaylist] = useState("");
-  const [isTransferToSpotify, setIsTransferToSpotify] = useState(false);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [isTransferToYouTube, setIsTransferToYouTube] = useState(false);
   const [playlistSongs, setPlaylistSongs] = useState(null);
 
   const handleSwitchChange = (event) => {
-    setIsTransferToSpotify(event.target.checked);
-    setSelectedPlaylist("");
+    setIsTransferToYouTube(event.target.checked);
     setPlaylistSongs(null);
   };
 
-  const transferYoutubePlaylist = async () => {
+  const transferPlaylist = async () => {
     try {
-      const response = await fetch("/api/playlist/transfer-youtube", {
-        method: "POST",
-        body: JSON.stringify({
-          playlistName: playlistSongs.name,
-          songs: playlistSongs.tracks,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `/api/playlist/transfer-${isTransferToYouTube ? "youtube" : "spotify"}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            playlistName: playlistSongs.name,
+            songs: playlistSongs.tracks,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const eventSource = new EventSource("/api/playlist/transfer-youtube");
-t
+      const eventSource = new EventSource(
+        `/api/playlist/transfer-${isTransferToYouTube ? "youtube" : "spotify"}`
+      );
+      eventSource.onmessage = (event) => {
+        const completed = parseInt(event.data, 10);
+        console.log(
+          `Transferred ${completed} out of ${playlistSongs.tracks.length} songs`
+        );
+        // Update UI with progress information
+      };
+
+      eventSource.addEventListener("done", (event) => {
+        console.log("Transfer complete:", event.data);
+        // Update UI to indicate that the transfer is complete
+        eventSource.close();
+      });
+
+      eventSource.onerror = (error) => {
+        console.error("Error transferring playlist:", error);
+        // Handle error, update UI
+      };
+    } catch (error) {
+      console.error("Error transferring playlist:", error);
+    }
+  };
+
+  const cleanPlaylist = async () => {
+    try {
+      const response = await fetch(
+        `/api/playlist/clean-${!isTransferToYouTube ? "youtube" : "spotify"}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            playlistName: playlistSongs.name,
+            songs: playlistSongs.tracks,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const eventSource = new EventSource(
+        `/api/playlist/clean-${!isTransferToYouTube ? "youtube" : "spotify"}`
+      );
       eventSource.onmessage = (event) => {
         const completed = parseInt(event.data, 10);
         console.log(
@@ -108,7 +157,7 @@ t
         try {
           const response = await axios.get(
             `/api/playlist/songs-${
-              isTransferToSpotify ? "spotify" : "youtube"
+              isTransferToYouTube ? "spotify" : "youtube"
             }?id=${selectedPlaylist}`
           );
           setPlaylistSongs(response.data);
@@ -119,32 +168,47 @@ t
 
       fetchPlaylistSongs();
     }
-  }, [selectedPlaylist, isTransferToSpotify]);
+  }, [selectedPlaylist]);
 
-  const originPlaylists = isTransferToSpotify
+  const originPlaylists = isTransferToYouTube
     ? spotifyPlaylists
     : youtubePlaylists;
 
   const originSelector = (
     <div className="p-4 w-full bg-slate-700 rounded-lg shadow-2xl">
-      <h2 className="bg-slate-900 text-2xl  rounded-lg p-2 text-gray-300 text-center font-bold mb-2">
-        Select {isTransferToSpotify ? "Spotify" : "Youtube"} Playlist
-      </h2>
-      <SimpleBar>
+      <p className="bg-slate-900  text-gray-300 text-2xl  rounded-lg span-2  text-center font-bold mb-2 p-2">
+        <span className="justify-center">
+          <span className="">{"Select "}</span>
+          <span
+            className={` transition-all duration-500 ease-in-out transform md:hover:scale-x-95 md:hover:scale-y-105
+                    ${
+                      isTransferToYouTube
+                        ? "text-spotify-green "
+                        : "text-youtube-red"
+                    }
+                  `}
+          >
+            {isTransferToYouTube ? "Spotify " : "Youtube "}
+          </span>
+          <span>Playlist</span>
+        </span>
+      </p>
+      <SimpleBar  autoHide={false} style={{ maxHeight: 600 }}>
         <div className="flex m-2 flex-col gap-2">
           {originPlaylists.map((playlist) => (
             <div
               key={playlist.id}
-              className={`p-1 rounded-md transition-all duration-500 ease-in-out transform md:hover:scale-x-95 md:hover:scale-y-105 ${
+              title={playlist.name}
+              className={`p-1 mr-2 rounded-md transition-all duration-500 ease-in-out transform md:hover:scale-x-95 md:hover:scale-y-105 ${
                 selectedPlaylist === playlist.id
-                  ? isTransferToSpotify
+                  ? isTransferToYouTube
                     ? "bg-spotify-green "
                     : "bg-youtube-red"
                   : "bg-slate-800"
               }`}
               onClick={() => {
                 if (selectedPlaylist && selectedPlaylist == playlist.id) {
-                  setSelectedPlaylist("");
+                  setSelectedPlaylist(null);
                   return;
                 }
                 setSelectedPlaylist(playlist.id);
@@ -155,9 +219,9 @@ t
                   <p
                     className={`text-left  ${
                       selectedPlaylist === playlist.id
-                        ? "text-gray-900"
-                        : "text-gray-300"
-                    } font-semibold`}
+                        ? "text-gray-900 font-bold"
+                        : "text-gray-300 font-semibold"
+                    } `}
                   >
                     {playlist.name}
                   </p>
@@ -169,7 +233,7 @@ t
                   <img
                     src={playlist.image}
                     alt={playlist.name}
-                    className="w-16 h-16 object-cover rounded-md"
+                    className="w-16 h-16 object-cover rounded-sm"
                   />
                 ) : (
                   <div className="w-16 h-16 object-cover rounded-md bg-slate-950"></div>
@@ -183,11 +247,11 @@ t
   );
 
   return (
-    <div className="flex flex-col content-start items-start justify-start p-4  md:w-7/12 w-screen h-screen">
+    <div className="flex flex-col content-start items-start justify-start p-4  md:w-7/12 lg:w-5/12 w-screen h-screen">
       <div className="flex flex-col items-center justify-center w-full mt-10 ">
         <div className="p-4">
           <ColoredSwitch
-            checked={isTransferToSpotify}
+            checked={isTransferToYouTube}
             onChange={handleSwitchChange}
             name="transferSwitch"
             inputProps={{ "aria-label": "Transfer switch" }}
@@ -195,21 +259,44 @@ t
         </div>
         <div className="flex flex-col w-full items-center gap-6">
           {originSelector}
-          <button
-            className={`w-full ${
-              isTransferToSpotify
-                ? " bg-spotify-green hover:bg-green-700 "
-                : "bg-youtube-red hover:bg-red-700"
-            } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105`}
-            onClick={() => {
-              if (isTransferToSpotify) {
-                transferYoutubePlaylist();
-              }
-            }}
-            disabled={!selectedPlaylist}
-          >
-            Copy to {isTransferToSpotify ? "Youtube" : "Spotify"}
-          </button>
+
+          <div className="flex flex-row w-full items-center gap-6">
+            <button
+              className={`w-full ${
+                isTransferToYouTube
+                  ? " bg-spotify-green hover:bg-green-700 "
+                  : "bg-youtube-red hover:bg-red-700"
+              } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md disabled:bg-slate-900 disabled:text-gray-300 ${
+                selectedPlaylist != null &&
+                "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+              }`}
+              onClick={() => {
+                transferPlaylist();
+              }}
+              disabled={!selectedPlaylist}
+              title={`Copy to ${isTransferToYouTube ? "Youtube" : "Spotify"}
+`}
+            >
+              Copy to {isTransferToYouTube ? "Youtube" : "Spotify"}
+            </button>
+            <button
+              className={`w-full ${
+                isTransferToYouTube
+                  ? " bg-spotify-green hover:bg-green-700 "
+                  : "bg-youtube-red hover:bg-red-700"
+              } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md disabled:bg-slate-900 disabled:text-gray-300 ${
+                selectedPlaylist != null &&
+                "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+              }`}
+              onClick={() => {
+                cleanPlaylist();
+              }}
+              disabled={selectedPlaylist == null}
+              title="Clean Playlist"
+            >
+              Clean Playlist
+            </button>
+          </div>
         </div>
       </div>
     </div>

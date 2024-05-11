@@ -19,6 +19,7 @@ export default function IndexPage() {
   const [isSpotifyLoggedIn, setIsSpotifyLoggedIn] = useState(false);
   const [isYouTubeLoggedIn, setIsYouTubeLoggedIn] = useState(false);
 
+
   useEffect(() => {
     async function checkSpotify() {
       try {
@@ -30,7 +31,6 @@ export default function IndexPage() {
           setIsSpotifyLoggedIn(false);
         }
       } catch (error) {
-        console.error("Error checking Spotify login status:", error);
         toast.error("Something went wrong, try refreshing 😔")
       }
     }
@@ -44,7 +44,6 @@ export default function IndexPage() {
           setIsYouTubeLoggedIn(false);
         }
       } catch (error) {
-        console.error("Error checking YouTube login status:", error);
         toast.error("Something went wrong, try refreshing 😔")
       }
     }
@@ -59,7 +58,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/user/spotify-profile");
         setSpotifyProfile(response.data);
       } catch (error) {
-        console.error("Error fetching Spotify profile:", error.message);
         toast.error("Something went wrong, try refreshing 😔");
       }
     }
@@ -70,7 +68,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/playlist/spotify");
         setSpotifyPlaylists(response.data);
       } catch (error) {
-        console.error("Error fetching Spotify playlists:", error);
         toast.error("Something went wrong, try refreshing 😔");
       }
     }
@@ -84,7 +81,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/user/youtube-profile");
         setYoutubeProfile(response.data);
       } catch (error) {
-        console.error("Error fetching YouTube profile:", error.message);
         toast.error("Something went wrong, try refreshing 😔");
       }
     }
@@ -95,7 +91,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/playlist/youtube");
         setYoutubePlaylists(response.data);
       } catch (error) {
-        console.error("Error fetching YouTube playlists:", error);
         toast.error("Something went wrong, try refreshing 😔");
       }
     }

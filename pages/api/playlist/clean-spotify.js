@@ -1,6 +1,7 @@
 import axios from "axios";
 
 let playlistData = null;
+let __DEBUG__ = false;
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
@@ -80,7 +81,7 @@ export default async function handler(req, res) {
             (item) => item.explicit === false
           );
 
-          if (cleanTrack) {
+          if (!__DEBUG__ && cleanTrack) {
             await axios.post(
               `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
               {

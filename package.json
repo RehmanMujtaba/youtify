@@ -22,6 +22,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-progressbar": "^15.4.1",
+    "react-toastify": "^10.0.5",
     "simple-oauth2": "^5.0.0",
     "simplebar-react": "^3.2.5"
   },

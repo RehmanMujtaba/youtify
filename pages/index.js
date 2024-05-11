@@ -1,4 +1,6 @@
 import "tailwindcss/tailwind.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 import { useState, useEffect, use } from "react";
 import axios from "axios";
@@ -29,6 +31,7 @@ export default function IndexPage() {
         }
       } catch (error) {
         console.error("Error checking Spotify login status:", error);
+        toast.error("Something went wrong, try refreshing 😔")
       }
     }
 
@@ -42,6 +45,7 @@ export default function IndexPage() {
         }
       } catch (error) {
         console.error("Error checking YouTube login status:", error);
+        toast.error("Something went wrong, try refreshing 😔")
       }
     }
 
@@ -56,6 +60,7 @@ export default function IndexPage() {
         setSpotifyProfile(response.data);
       } catch (error) {
         console.error("Error fetching Spotify profile:", error.message);
+        toast.error("Something went wrong, try refreshing 😔");
       }
     }
     fetchSpotifyProfile();
@@ -66,6 +71,7 @@ export default function IndexPage() {
         setSpotifyPlaylists(response.data);
       } catch (error) {
         console.error("Error fetching Spotify playlists:", error);
+        toast.error("Something went wrong, try refreshing 😔");
       }
     }
 
@@ -79,6 +85,7 @@ export default function IndexPage() {
         setYoutubeProfile(response.data);
       } catch (error) {
         console.error("Error fetching YouTube profile:", error.message);
+        toast.error("Something went wrong, try refreshing 😔");
       }
     }
     fetchYoutubeProfile();
@@ -89,6 +96,7 @@ export default function IndexPage() {
         setYoutubePlaylists(response.data);
       } catch (error) {
         console.error("Error fetching YouTube playlists:", error);
+        toast.error("Something went wrong, try refreshing 😔");
       }
     }
     fetchYoutubePlaylists();
@@ -167,6 +175,18 @@ export default function IndexPage() {
           youtubePlaylists={youtubePlaylists}
         />
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

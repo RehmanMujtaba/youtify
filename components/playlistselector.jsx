@@ -6,6 +6,7 @@ import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import axios from "axios";
 import ProgressBar from "@ramonak/react-progress-bar";
+import { Toast, toast } from "react-toastify";
 
 const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
   width: 62,
@@ -114,6 +115,7 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
           setIsTransferring(false);
           setProgress(0);
         }, 2500);
+        toast.success("Playlist Transferred!")
       });
 
       eventSource.onerror = (error) => {
@@ -123,6 +125,7 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
       console.error("Error transferring playlist:", error);
       setIsTransferring(false);
       setProgress(0);
+      toast.error("Something went wrong 😔")
     }
   };
 
@@ -169,17 +172,20 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         setTimeout(() => {
           setIsTransferring(false);
           setProgress(0);
+          toast.success("Playlist Cleaned")
         }, 2500);
+
       });
 
       eventSource.onerror = (error) => {
         console.error("Error transferring playlist:", error);
         // Handle error, update UI
-        setProgress(0);
       };
     } catch (error) {
       console.error("Error transferring playlist:", error);
       setProgress(0);
+      setIsTransferring(false);
+      toast.error("Something went wrong 😔")
     }
   };
 
@@ -195,6 +201,7 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
           setPlaylistSongs(response.data);
         } catch (error) {
           console.error("Error fetching playlist songs:", error);
+          toast.error("Something went wrong, try refreshing")
         }
       };
 

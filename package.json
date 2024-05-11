@@ -9,6 +9,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/material": "^5.15.17",
+    "@ramonak/react-progress-bar": "^5.2.0",
     "axios": "^1.6.8",
     "cookie": "^0.6.0",
     "cookie-parser": "^1.4.6",
@@ -20,6 +21,7 @@
     "next-auth": "^4.24.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-progressbar": "^15.4.1",
     "simple-oauth2": "^5.0.0",
     "simplebar-react": "^3.2.5"
   },

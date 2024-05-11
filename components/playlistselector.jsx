@@ -5,6 +5,7 @@ import Switch from "@mui/material/Switch";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import axios from "axios";
+import ProgressBar from "@ramonak/react-progress-bar";
 
 const ColoredSwitch = styled(Switch)(({ theme, checked }) => ({
   width: 62,
@@ -54,10 +55,15 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
   const [isTransferToYouTube, setIsTransferToYouTube] = useState(false);
   const [playlistSongs, setPlaylistSongs] = useState(null);
 
+  const [progress, setProgress] = useState(1);
+
   const handleSwitchChange = (event) => {
     setIsTransferToYouTube(event.target.checked);
     setPlaylistSongs(null);
+    setSelectedPlaylist(null);
   };
+
+  useEffect(() => {}, [progress]);
 
   const transferPlaylist = async () => {
     try {
@@ -87,21 +93,25 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         console.log(
           `Transferred ${completed} out of ${playlistSongs.tracks.length} songs`
         );
-        // Update UI with progress information
+        const currprogress = (completed / playlistSongs.tracks.length) * 100;
+        console.log(currprogress);
+        setProgress(currprogress);
       };
 
       eventSource.addEventListener("done", (event) => {
         console.log("Transfer complete:", event.data);
         // Update UI to indicate that the transfer is complete
         eventSource.close();
+        setProgress(0);
       });
 
       eventSource.onerror = (error) => {
         console.error("Error transferring playlist:", error);
-        // Handle error, update UI
+        setProgress(0);
       };
     } catch (error) {
       console.error("Error transferring playlist:", error);
+      setProgress(0);
     }
   };
 
@@ -133,21 +143,26 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
         console.log(
           `Transferred ${completed} out of ${playlistSongs.tracks.length} songs`
         );
-        // Update UI with progress information
+        const currprogress = (completed / playlistSongs.tracks.length) * 100;
+        console.log(currprogress);
+        setProgress(currprogress);
       };
 
       eventSource.addEventListener("done", (event) => {
         console.log("Transfer complete:", event.data);
         // Update UI to indicate that the transfer is complete
         eventSource.close();
+        setProgress(0);
       });
 
       eventSource.onerror = (error) => {
         console.error("Error transferring playlist:", error);
         // Handle error, update UI
+        setProgress(0);
       };
     } catch (error) {
       console.error("Error transferring playlist:", error);
+      setProgress(0);
     }
   };
 
@@ -175,7 +190,7 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
     : youtubePlaylists;
 
   const originSelector = (
-    <div className="p-4 w-full bg-slate-700 rounded-lg shadow-2xl">
+    <div className="p-4 w-full  bg-slate-700 rounded-lg shadow-2xl ">
       <p className="bg-slate-900  text-gray-300 text-2xl  rounded-lg span-2  text-center font-bold mb-2 p-2">
         <span className="justify-center">
           <span className="">{"Select "}</span>
@@ -233,7 +248,7 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
                   <img
                     src={playlist.image}
                     alt={playlist.name}
-                    className="w-16 h-16 object-cover rounded-sm"
+                    className="w-16 h-16 object-cover rounded-md"
                   />
                 ) : (
                   <div className="w-16 h-16 object-cover rounded-md bg-slate-950"></div>
@@ -247,71 +262,87 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
   );
 
   return (
-    <div className="flex flex-col content-start items-start justify-start p-4  md:w-7/12 lg:w-5/12 w-screen h-screen">
-      <div className="flex flex-col items-center justify-center w-full mt-10 ">
-        <div className="flex flex-row flex-grow w-full justify-center p-4">
-          <div style={{ width: 55, height: 55 }}>
-            <img
-              src="YouTube_full-color_icon_(2017).svg.png"
-              alt="YouTube"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
+    <div className="flex flex-col items-center justify-start bg-slate-800 min-h-screen flex-grow">
+      <div className="flex flex-col content-start items-start justify-start p-4  md:w-7/12 lg:w-5/12 w-screen h-auto">
+        <div className="flex flex-col items-center justify-center w-full mt-10 ">
+          <div className="flex flex-row flex-grow w-full justify-center p-4">
+            <div
+              className="self-center hover:cursor-pointer"
+              onClick={() => setIsTransferToYouTube(false)}
+              style={{ width: 55, height: 55 }}
+            >
+              <img
+                src="YouTube_full-color_icon_(2017).svg.png"
+                alt="YouTube"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </div>
+            <div className="self-center">
+              <ColoredSwitch
+                checked={isTransferToYouTube}
+                onChange={handleSwitchChange}
+                name="transferSwitch"
+                inputProps={{ "aria-label": "Transfer switch" }}
+              />
+            </div>
+            <div
+              className="self-center hover:cursor-pointer"
+              style={{ width: 45, height: 45 }}
+              onClick={() => setIsTransferToYouTube(true)}
+            >
+              <img
+                src="Spotify_icon.svg.png"
+                alt="Spotify"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </div>
           </div>
-          <div className="self-center">
-            <ColoredSwitch
-              checked={isTransferToYouTube}
-              onChange={handleSwitchChange}
-              name="transferSwitch"
-              inputProps={{ "aria-label": "Transfer switch" }}
-            />
-          </div>
-          <div className="self-center" style={{ width: 45, height: 45 }}>
-            <img
-              src="Spotify_icon.svg.png"
-              alt="Spotify"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col w-full items-center gap-6">
-          {originSelector}
+          <div className="flex flex-col w-full items-center gap-6">
+            {originSelector}
 
-          <div className="flex flex-row w-full items-center gap-6">
-            <button
-              className={`w-full ${
-                isTransferToYouTube
-                  ? " bg-spotify-green hover:bg-green-700 disabled:bg-green-700"
-                  : "bg-youtube-red hover:bg-red-700 disabled:bg-red-700"
-              } font-bold text-white p-3 text-xl w-11/12 h-full justify-center align-middle items-center rounded-md disabled:opacity-40 hover:disabled:cursor-not-allowed disabled:text-gray-300 ${
-                selectedPlaylist != null &&
-                "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-              }`}
-              onClick={() => {
-                transferPlaylist();
-              }}
-              disabled={!selectedPlaylist}
-              title={`Copy to ${isTransferToYouTube ? "Youtube" : "Spotify"}
-`}
-            >
-              Copy to {isTransferToYouTube ? "Youtube" : "Spotify"}
-            </button>
-            <button
-              className={`w-full ${
-                isTransferToYouTube
-                  ? " bg-spotify-green hover:bg-green-700 disabled:bg-green-700"
-                  : "bg-youtube-red hover:bg-red-700 disabled:bg-red-700"
-              } font-bold text-white p-3 text-xl w-11/12 h-full justify-center align-middle items-center rounded-md disabled:opacity-40 hover:disabled:cursor-not-allowed disabled:text-gray-300 ${
-                selectedPlaylist != null &&
-                "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-              }`}
-              onClick={() => {
-                cleanPlaylist();
-              }}
-              disabled={selectedPlaylist == null}
-              title="Clean Playlist"
-            >
-              Clean Playlist
-            </button>
+            {progress != 0 && <ProgressBar completed={progress} />}
+
+            <div className="flex flex-row justify-between flex-grow w-full items-center gap-4 sm:gap-6">
+              <div className="flex-grow w-1/2">
+                <button
+                  className={`w-full ${
+                    isTransferToYouTube
+                      ? " bg-spotify-green hover:bg-green-700 disabled:bg-green-700"
+                      : "bg-youtube-red hover:bg-red-700 disabled:bg-red-700"
+                  } font-bold text-white p-3 text-xl w-full h-full text-center whitespace-normal rounded-md disabled:opacity-40 hover:disabled:cursor-not-allowed disabled:text-gray-300 ${
+                    selectedPlaylist != null &&
+                    "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+                  }`}
+                  onClick={async () => {
+                    transferPlaylist();
+                  }}
+                  disabled={!selectedPlaylist}
+                  title={`Copy to ${isTransferToYouTube ? "Youtube" : "Spotify"}
+    `}
+                >
+                  Copy to {isTransferToYouTube ? "Youtube" : "Spotify"}
+                </button>
+              </div>
+              <div className="flex-grow w-1/2">
+                <button
+                  className={`w-full ${
+                    isTransferToYouTube
+                      ? " bg-spotify-green hover:bg-green-700 disabled:bg-green-700"
+                      : "bg-youtube-red hover:bg-red-700 disabled:bg-red-700"
+                  } font-bold text-white p-3 text-xl w-11/12 min-h-full flex-grow justify-center align-middle items-center rounded-md disabled:opacity-40 hover:disabled:cursor-not-allowed disabled:text-gray-300 ${
+                    selectedPlaylist != null &&
+                    "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+                  }`}
+                  onClick={async () => {
+                    cleanPlaylist();
+                  }}
+                  disabled={selectedPlaylist == null}
+                  title="Clean Playlist"
+                >
+                  Clean Playlist
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

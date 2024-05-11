@@ -24,7 +24,7 @@ const HomePage = ({
         <div className="text-xl text-gray-400">
           All your playlist, all your platforms.
         </div>
-        <div className="flex flex-col gap-4 md:w-1/4 w-4/5">
+        <div className="flex flex-col gap-4 md:w-1/4 min-w-72 w-4/5">
           {isSpotifyLoggedIn ? (
             <div className="flex flex-row justify-between rounded-lg bg-spotify-green shadow-md p-1 h-14">
               <div className="flex items-center justify-center h-full text-l font-semibold text-white">

@@ -5,6 +5,7 @@ import axios from "axios";
 
 import HomePage from "components/home";
 import ActionPage from "components/actionpage";
+import PlaylistSelector from "components/playlistselector";
 
 export default function IndexPage() {
   const [spotifyProfile, setSpotifyProfile] = useState(null);
@@ -161,9 +162,7 @@ export default function IndexPage() {
         setIsYouTubeLoggedIn={setIsYouTubeLoggedIn}
       />
       {spotifyProfile && youtubeProfile && (
-        <ActionPage
-          spotifyProfile={spotifyProfile}
-          youtubeProfile={youtubeProfile}
+        <PlaylistSelector
           spotifyPlaylists={spotifyPlaylists}
           youtubePlaylists={youtubePlaylists}
         />

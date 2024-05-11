@@ -193,13 +193,13 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
           <span>Playlist</span>
         </span>
       </p>
-      <SimpleBar  autoHide={false} style={{ maxHeight: 600 }}>
+      <SimpleBar autoHide={false} style={{ maxHeight: 550 }}>
         <div className="flex m-2 flex-col gap-2">
           {originPlaylists.map((playlist) => (
             <div
               key={playlist.id}
               title={playlist.name}
-              className={`p-1 mr-2 rounded-md transition-all duration-500 ease-in-out transform md:hover:scale-x-95 md:hover:scale-y-105 ${
+              className={`p-1 mr-2 rounded-md transition-all duration-500 ease-in-out transform hover:cursor-pointer md:hover:scale-x-95 md:hover:scale-y-105 ${
                 selectedPlaylist === playlist.id
                   ? isTransferToYouTube
                     ? "bg-spotify-green "
@@ -249,13 +249,29 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
   return (
     <div className="flex flex-col content-start items-start justify-start p-4  md:w-7/12 lg:w-5/12 w-screen h-screen">
       <div className="flex flex-col items-center justify-center w-full mt-10 ">
-        <div className="p-4">
-          <ColoredSwitch
-            checked={isTransferToYouTube}
-            onChange={handleSwitchChange}
-            name="transferSwitch"
-            inputProps={{ "aria-label": "Transfer switch" }}
-          />
+        <div className="flex flex-row flex-grow w-full justify-center p-4">
+          <div style={{ width: 55, height: 55 }}>
+            <img
+              src="YouTube_full-color_icon_(2017).svg.png"
+              alt="YouTube"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          </div>
+          <div className="self-center">
+            <ColoredSwitch
+              checked={isTransferToYouTube}
+              onChange={handleSwitchChange}
+              name="transferSwitch"
+              inputProps={{ "aria-label": "Transfer switch" }}
+            />
+          </div>
+          <div className="self-center" style={{ width: 45, height: 45 }}>
+            <img
+              src="Spotify_icon.svg.png"
+              alt="Spotify"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          </div>
         </div>
         <div className="flex flex-col w-full items-center gap-6">
           {originSelector}
@@ -264,9 +280,9 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
             <button
               className={`w-full ${
                 isTransferToYouTube
-                  ? " bg-spotify-green hover:bg-green-700 "
-                  : "bg-youtube-red hover:bg-red-700"
-              } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md disabled:bg-slate-900 disabled:text-gray-300 ${
+                  ? " bg-spotify-green hover:bg-green-700 disabled:bg-green-700"
+                  : "bg-youtube-red hover:bg-red-700 disabled:bg-red-700"
+              } font-bold text-white p-3 text-xl w-11/12 h-full justify-center align-middle items-center rounded-md disabled:opacity-40 hover:disabled:cursor-not-allowed disabled:text-gray-300 ${
                 selectedPlaylist != null &&
                 "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
               }`}
@@ -282,9 +298,9 @@ const PlaylistSelector = ({ spotifyPlaylists, youtubePlaylists }) => {
             <button
               className={`w-full ${
                 isTransferToYouTube
-                  ? " bg-spotify-green hover:bg-green-700 "
-                  : "bg-youtube-red hover:bg-red-700"
-              } font-bold text-white p-3 text-xl w-11/12 justify-center align-middle items-center rounded-md disabled:bg-slate-900 disabled:text-gray-300 ${
+                  ? " bg-spotify-green hover:bg-green-700 disabled:bg-green-700"
+                  : "bg-youtube-red hover:bg-red-700 disabled:bg-red-700"
+              } font-bold text-white p-3 text-xl w-11/12 h-full justify-center align-middle items-center rounded-md disabled:opacity-40 hover:disabled:cursor-not-allowed disabled:text-gray-300 ${
                 selectedPlaylist != null &&
                 "transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105"
               }`}

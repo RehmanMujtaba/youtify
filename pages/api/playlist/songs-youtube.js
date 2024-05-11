@@ -39,13 +39,13 @@ export default async function getPlaylist(req, res) {
     const playlist = {
       id: id,
       name: titleResponse.data.items[0].snippet.title,
-      description: response.data.items[0].snippet.description,
-      image: response.data.items[0].snippet.thumbnails.default.url,
-      tracks: response.data.items.map((item) => ({
+      description: titleResponse.data.items[0].snippet.description,
+      image: response.data.items[0]?.snippet?.thumbnails?.default?.url || 'default-image-url',
+      tracks: response.data.items.length > 0 ? response.data.items.map((item) => ({
         id: item.snippet.resourceId.videoId,
         name: item.snippet.title,
         artist: item.snippet.channelTitle,
-      })),
+      })) : [],
     };
 
     res.status(200).json(playlist);

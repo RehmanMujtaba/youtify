@@ -26,11 +26,11 @@ export default async function getPlaylist(req, res) {
         image: response.data.images && response.data.images.length > 0
           ? response.data.images[0].url
           : null,
-        tracks: response.data.tracks.items.map((item) => ({
+        tracks: response.data.tracks.length > 0 ? response.data.tracks.items.map((item) => ({
           id: item.track.id,
           name: item.track.name,
           artist: item.track.artists[0].name,
-        })),
+        })) : [],
       };
       
       res.status(200).json(playlist);

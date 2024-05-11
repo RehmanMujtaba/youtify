@@ -1,10 +1,10 @@
 // pages/api/auth/callback.js
 import NextAuth from 'next-auth';
-import Providers from 'next-auth/providers';
+import Google from 'next-auth/providers/google';
 
 export default NextAuth({
   providers: [
-    Providers.Youtube({
+    Google({
       clientId: process.env.YOUTUBE_CLIENT_ID,
       clientSecret: process.env.YOUTUBE_CLIENT_SECRET
     })

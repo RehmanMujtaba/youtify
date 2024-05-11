@@ -31,7 +31,6 @@ export default function IndexPage() {
           setIsSpotifyLoggedIn(false);
         }
       } catch (error) {
-        toast.error("Something went wrong, try refreshing 😔")
       }
     }
 
@@ -44,7 +43,6 @@ export default function IndexPage() {
           setIsYouTubeLoggedIn(false);
         }
       } catch (error) {
-        toast.error("Something went wrong, try refreshing 😔")
       }
     }
 
@@ -58,7 +56,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/user/spotify-profile");
         setSpotifyProfile(response.data);
       } catch (error) {
-        toast.error("Something went wrong, try refreshing 😔");
       }
     }
     fetchSpotifyProfile();
@@ -68,7 +65,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/playlist/spotify");
         setSpotifyPlaylists(response.data);
       } catch (error) {
-        toast.error("Something went wrong, try refreshing 😔");
       }
     }
 
@@ -81,7 +77,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/user/youtube-profile");
         setYoutubeProfile(response.data);
       } catch (error) {
-        toast.error("Something went wrong, try refreshing 😔");
       }
     }
     fetchYoutubeProfile();
@@ -91,7 +86,6 @@ export default function IndexPage() {
         const response = await axios.get("/api/playlist/youtube");
         setYoutubePlaylists(response.data);
       } catch (error) {
-        toast.error("Something went wrong, try refreshing 😔");
       }
     }
     fetchYoutubePlaylists();

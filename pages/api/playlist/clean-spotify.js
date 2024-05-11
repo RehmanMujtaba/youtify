@@ -67,7 +67,6 @@ export default async function handler(req, res) {
               params: {
                 q: `${song.name} ${song.artist} clean edit`,
                 type: "track",
-                limit: 4,
               },
               headers: {
                 Authorization: `Bearer ${spotifyAccessToken}`,
@@ -94,6 +93,7 @@ export default async function handler(req, res) {
                 },
               }
             );
+            
           } else {
             console.log("No track found for: ", song.name);
           }
@@ -101,9 +101,11 @@ export default async function handler(req, res) {
           // Send progress update
           completed++;
           res.write(`data: ${completed}\n\n`);
+          res.flush();
+          console.log(completed)
         } catch (error) {
           console.error(
-            `Failed to add song ${song.name} to the playlist. Error: ${error}`
+            `Failed to add song ${song.name} to the playlist. Error: ${error}\n`
           );
         }
       }
@@ -120,6 +122,5 @@ export default async function handler(req, res) {
       res.status(500).json({ message: "Internal server error" });
     }
   } else {
-    // Existing code for GET request...
   }
 }

@@ -12,8 +12,8 @@ Youtify is a web app to moves your music playlist between Youtube and Spotify, a
 ## Usage
 
 ```
-git clone https://github.com/RehmanMujtaba/Playlist-Import
-cd Playlist-Import
+git clone https://github.com/RehmanMujtaba/youtify
+cd youtify
 
 # Create .env file with YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET
 # Instructions to do this can be found online
